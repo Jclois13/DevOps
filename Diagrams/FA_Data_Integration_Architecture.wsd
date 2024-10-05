@@ -1,0 +1,61 @@
+@startuml
+
+package "Data Analytics & Integration" {
+    class BICC {
+    }
+    class AtomFeeds {
+    }
+    class OIC {
+    }
+    class ADW {
+    }
+    class DataFlow {
+    }
+    class OracleObjectStorage {
+    }
+    class OracleRestDataservices {
+    }
+    class KafkaCluster {
+    }
+    class GoldenGate {
+    }
+    class OnPremDataMart {
+    }
+    class BIP_HCM_Extracts {
+    }
+    class ERPBusinessEvents {
+    }
+}
+
+package "VBCS and APEX Tenant & OIC Business Logic Layer" {
+    class OracleATPDatabase {
+    }
+    class VBCS_Solutions {
+    }
+    class OIC_Orchestrations {
+    }
+    class ORDS_Webservice {
+    }
+}
+
+BICC --> OracleObjectStorage : Ingests BICC files
+AtomFeeds <-- OIC : Atom Feeds processed by OIC
+OIC --> OracleObjectStorage : OIC creates Atom Feeds files
+BIP_HCM_Extracts --> OracleObjectStorage : Ingests BIP/HCM Extracts
+
+OracleObjectStorage <-- DataFlow : ADW uses Live Feeds (DataFlow)
+DataFlow --> ADW : Ingests data into ADW
+
+OracleRestDataservices <-- ADW : Exposes data to clients via API (replaces PolyBase)
+KafkaCluster <-- ADW : Streams data to Kafka using the KafkaCDCAdapter
+GoldenGate --> ADW : Streams targeted data to DataMart
+GoldenGate --> OnPremDataMart : Streams data to DataMart
+
+OracleATPDatabase --> VBCS_Solutions : Serves as backend/tenant for VBCS solutions
+OracleATPDatabase --> OIC_Orchestrations : Business logic layer for OIC orchestrations (replaces DBCS with connectivity agent)
+ORDS_Webservice --> OracleATPDatabase : Example of High volume webservice
+
+ERPBusinessEvents --> OIC : ERP Business Events processed by OIC
+OIC --> KafkaCluster : Streams data to Kafka
+
+@enduml

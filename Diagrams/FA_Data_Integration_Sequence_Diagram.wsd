@@ -1,0 +1,34 @@
+@startuml
+
+participant BICC
+participant AtomFeeds
+participant OIC
+participant BIP_HCM_Extracts
+participant OracleObjectStorage
+participant DataFlow
+participant ADW
+participant OracleRestDataservices
+participant KafkaCluster
+participant GoldenGate
+participant OnPremDataMart
+participant ERPBusinessEvents
+
+BICC -> OracleObjectStorage : Store BICC files in Object Storage
+BIP_HCM_Extracts -> OracleObjectStorage : Ingests BIP/HCM Extracts
+
+ERPBusinessEvents -> OIC : Processes ERP Business Events
+OIC -> KafkaCluster : Streams data to Kafka
+
+AtomFeeds -> OIC : Atom Feeds processed by OIC
+OIC -> OracleObjectStorage : Creates Atom Feeds files
+
+OracleObjectStorage -> DataFlow : ADW uses Live Feeds (DataFlow)
+DataFlow -> ADW : Ingests data into ADW
+
+ADW -> OracleRestDataservices : Exposes data to clients via API (replaces PolyBase, C# webservices, etc.)
+ADW -> KafkaCluster : Streams data to Kafka using the KafkaCDCAdapter
+
+GoldenGate -> ADW : Streams targeted data from On Prem DataMarts
+GoldenGate -> OnPremDataMart : Streams data to DataMart
+
+@enduml
